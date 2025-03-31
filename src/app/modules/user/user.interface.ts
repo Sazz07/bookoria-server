@@ -11,7 +11,7 @@ export type TUserName = {
 export type TUserRole = (typeof USER_ROLE)[keyof typeof USER_ROLE];
 
 export type TUser = {
-  id: string;
+  _id: string;
   name: TUserName;
   email: string;
   password: string;

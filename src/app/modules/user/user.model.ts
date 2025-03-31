@@ -83,16 +83,24 @@ UserSchema.virtual('fullName').get(function () {
 });
 
 // Check user exist
-UserSchema.methods.isUserExist = async function (email: string) {
+UserSchema.statics.isUserExist = async function (email: string) {
   return await User.findOne({ email }).select('+password');
 };
 
 // Check password
-UserSchema.methods.isPasswordMatched = async function (
+UserSchema.statics.isPasswordMatched = async function (
   plainTextPassword: string,
   hashedPassword: string,
 ) {
   return await bcrypt.compare(plainTextPassword, hashedPassword);
+};
+
+// Check password changed after token issued
+UserSchema.statics.isJWTissuedBeforePasswordChange = async function (
+  passwordChangedAt: Date,
+  jwtIssuedTimestamp: number,
+) {
+  return new Date(passwordChangedAt).getTime() / 1000 > jwtIssuedTimestamp;
 };
 
 export const User = model<TUser, UserModel>('User', UserSchema);

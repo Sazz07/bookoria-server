@@ -14,3 +14,14 @@ export type TRegister = {
   isBlocked?: boolean;
   passwordChangedAt?: Date;
 };
+
+export type TChangePassword = {
+  oldPassword: string;
+  newPassword: string;
+};
+
+export type TJwtPayload = {
+  userId: string;
+  email: string;
+  role: TUserRole;
+};
