@@ -18,8 +18,8 @@ const register = catchAsync(async (req, res) => {
   });
 
   sendResponse(res, {
-    success: true,
     statusCode: httpStatus.OK,
+    success: true,
     message: 'User registered successfully',
     data: { accessToken },
   });
@@ -38,8 +38,8 @@ const userLogin = catchAsync(async (req, res) => {
   });
 
   sendResponse(res, {
-    success: true,
     statusCode: httpStatus.OK,
+    success: true,
     message: 'User logged in successfully',
     data: { accessToken },
   });
@@ -48,8 +48,8 @@ const userLogin = catchAsync(async (req, res) => {
 const userLogout = catchAsync(async (req, res) => {
   res.clearCookie('refreshToken');
   sendResponse(res, {
-    success: true,
     statusCode: httpStatus.OK,
+    success: true,
     message: 'User logged out successfully',
   });
 });
@@ -58,8 +58,8 @@ const changePassword = catchAsync(async (req, res) => {
   await authService.changePassword(req.user, req.body);
 
   sendResponse(res, {
-    success: true,
     statusCode: httpStatus.OK,
+    success: true,
     message: 'Password changed successfully',
   });
 });
@@ -68,8 +68,8 @@ const refreshToken = catchAsync(async (req, res) => {
   const result = await authService.refreshToken(req.cookies?.refreshToken);
 
   sendResponse(res, {
-    success: true,
     statusCode: httpStatus.OK,
+    success: true,
     message: 'User logged in successfully',
     data: result,
   });
@@ -79,8 +79,8 @@ const forgetPassword = catchAsync(async (req, res) => {
   await authService.forgetPassword(req.body.email);
 
   sendResponse(res, {
-    success: true,
     statusCode: httpStatus.OK,
+    success: true,
     message: 'Password reset link sent successfully',
   });
 });
