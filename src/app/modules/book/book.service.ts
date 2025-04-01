@@ -51,7 +51,7 @@ const createBulkBooks = async (payload: TBook[]) => {
 
 const getAllBooks = async (query: Record<string, unknown>) => {
   const bookQuery = new QueryBuilder(Book.find(), query)
-    .search(['title', 'author', 'genre'])
+    .search(['title', 'author', 'genre', 'publisher'])
     .filter()
     .sort()
     .paginate()

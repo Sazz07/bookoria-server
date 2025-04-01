@@ -1,17 +1,12 @@
 {
   "info": {
-    "_postman_id": "b5e7a3d2-f8c4-4a9e-b5d3-c8f2e9d7a1b6",
+    "_postman_id": "7c17ab95-f781-48e3-bc46-17c78387f0b5",
     "name": "Book Shop API",
     "description": "API collection for Book Shop Backend",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "18838938",
+    "_collection_link": "https://galactic-astronaut-184430.postman.co/workspace/Sazzad~1d0535dc-27ec-4fd0-b26e-dcc48bf8aadc/collection/18838938-7c17ab95-f781-48e3-bc46-17c78387f0b5?action=share&source=collection_link&creator=18838938"
   },
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:5000/api/v1",
-      "type": "string"
-    }
-  ],
   "item": [
     {
       "name": "Auth",
@@ -28,7 +23,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": {\n    \"firstName\": \"Rahim\",\n    \"middleName\": \"\",\n    \"lastName\": \"Ahmed\"\n  },\n  \"email\": \"rahim.ahmed@gmail.com\",\n  \"password\": \"Password123!\"\n}"
+              "raw": "{\n  \"name\": {\n    \"firstName\": \"Sazzad\",\n    \"middleName\": \"Hossain\",\n    \"lastName\": \"Shimanto\"\n  },\n  \"email\": \"sazzad.ahmed@gmail.com\",\n  \"password\": \"Password123!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/register",
@@ -36,29 +31,6 @@
               "path": ["auth", "register"]
             },
             "description": "Register a new user"
-          },
-          "response": []
-        },
-        {
-          "name": "Register Admin",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": {\n    \"firstName\": \"Karim\",\n    \"middleName\": \"\",\n    \"lastName\": \"Khan\"\n  },\n  \"email\": \"karim.admin@gmail.com\",\n  \"password\": \"Admin123!\",\n  \"role\": \"admin\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "register"]
-            },
-            "description": "Register a new admin"
           },
           "response": []
         },
@@ -74,7 +46,8 @@
                   "    pm.environment.set(\"token\", jsonData.data.accessToken);",
                   "}"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {}
               }
             }
           ],
@@ -88,7 +61,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"rahim.ahmed@gmail.com\",\n  \"password\": \"Password123!\"\n}"
+              "raw": "{\n  \"email\": \"sazzad.ahmed@gmail.com\",\n  \"password\": \"Password123!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
@@ -96,43 +69,6 @@
               "path": ["auth", "login"]
             },
             "description": "Login to get access token"
-          },
-          "response": []
-        },
-        {
-          "name": "Login Admin",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData && jsonData.data && jsonData.data.accessToken) {",
-                  "    pm.environment.set(\"adminToken\", jsonData.data.accessToken);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"karim.admin@gmail.com\",\n  \"password\": \"Admin123!\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
-            },
-            "description": "Login as admin to get admin access token"
           },
           "response": []
         },
@@ -222,7 +158,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
@@ -241,7 +177,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
@@ -264,12 +200,12 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": {\n    \"firstName\": \"Rahim\",\n    \"lastName\": \"Ahmed\"\n  },\n  \"role\": \"user\"\n}"
+              "raw": "{\n  \"role\": \"user\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/users/{{userId}}",
@@ -287,7 +223,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
@@ -306,7 +242,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
@@ -335,7 +271,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -362,12 +298,12 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "[\n  {\n    \"title\": \"Chander Pahar\",\n    \"author\": \"Bibhutibhushan Bandyopadhyay\",\n    \"genre\": \"Adventure\",\n    \"description\": \"A thrilling adventure novel set in Africa.\",\n    \"price\": 320,\n    \"stock\": 40,\n    \"publicationDate\": \"1937-05-10\",\n    \"publisher\": \"Desh Publishing\",\n    \"isbn\": \"9789849112533\",\n    \"language\": \"Bengali\",\n    \"pageCount\": 280,\n    \"coverImage\": \"https://m.media-amazon.com/images/I/51Ht1mJUCnL._SY445_SX342_.jpg\",\n    \"format\": \"Paperback\",\n    \"discount\": 5\n  },\n  {\n    \"title\": \"Feluda Samagra\",\n    \"author\": \"Satyajit Ray\",\n    \"genre\": \"Mystery\",\n    \"description\": \"Collection of detective stories featuring the iconic Bengali detective Feluda.\",\n    \"price\": 550,\n    \"stock\": 30,\n    \"publicationDate\": \"1979-12-01\",\n    \"publisher\": \"Ananda Publishers\",\n    \"isbn\": \"9789849112534\",\n    \"language\": \"Bengali\",\n    \"pageCount\": 650,\n    \"coverImage\": \"https://m.media-amazon.com/images/I/51N9nZiqzQL._SY445_SX342_.jpg\",\n    \"format\": \"Hardcover\",\n    \"featured\": true\n  }\n]"
+              "raw": "[\n  {\n    \"title\": \"Chander Pahar\",\n    \"author\": \"Bibhutibhushan Bandyopadhyay\",\n    \"genre\": \"History\",\n    \"description\": \"A thrilling adventure novel set in Africa.\",\n    \"price\": 320,\n    \"stock\": 40,\n    \"publicationDate\": \"1937-05-10\",\n    \"publisher\": \"Desh Publishing\",\n    \"isbn\": \"9789849112533\",\n    \"language\": \"Bengali\",\n    \"pageCount\": 280,\n    \"coverImage\": \"https://m.media-amazon.com/images/I/51Ht1mJUCnL._SY445_SX342_.jpg\",\n    \"format\": \"Paperback\",\n    \"discount\": 5\n  },\n  {\n    \"title\": \"Feluda Samagra\",\n    \"author\": \"Satyajit Ray\",\n    \"genre\": \"Mystery\",\n    \"description\": \"Collection of detective stories featuring the iconic Bengali detective Feluda.\",\n    \"price\": 550,\n    \"stock\": 30,\n    \"publicationDate\": \"1979-12-01\",\n    \"publisher\": \"Ananda Publishers\",\n    \"isbn\": \"9789849112534\",\n    \"language\": \"Bengali\",\n    \"pageCount\": 650,\n    \"coverImage\": \"https://m.media-amazon.com/images/I/51N9nZiqzQL._SY445_SX342_.jpg\",\n    \"format\": \"Hardcover\",\n    \"featured\": true\n  }\n]"
             },
             "url": {
               "raw": "{{base_url}}/books/bulk",
@@ -398,81 +334,47 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/books?genre=Mystery&minPrice=300&maxPrice=600&featured=true",
+              "raw": "{{base_url}}/books?searchTerm=Ananda Publishers",
               "host": ["{{base_url}}"],
               "path": ["books"],
               "query": [
                 {
                   "key": "genre",
-                  "value": "Mystery"
+                  "value": "Mystery",
+                  "disabled": true
                 },
                 {
                   "key": "minPrice",
-                  "value": "300"
+                  "value": "300",
+                  "disabled": true
                 },
                 {
                   "key": "maxPrice",
-                  "value": "600"
+                  "value": "600",
+                  "disabled": true
                 },
                 {
                   "key": "featured",
-                  "value": "true"
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "Ananda Publishers"
                 }
               ]
             },
             "description": "Get books with filtering options"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Books with Search",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/books?searchTerm=Satyajit",
-              "host": ["{{base_url}}"],
-              "path": ["books"],
-              "query": [
-                {
-                  "key": "searchTerm",
-                  "value": "Satyajit"
-                }
-              ]
-            },
-            "description": "Search books by title, author, or genre"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Books with Pagination",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/books?page=1&limit=10&sortBy=price&sortOrder=desc",
-              "host": ["{{base_url}}"],
-              "path": ["books"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "limit",
-                  "value": "10"
-                },
-                {
-                  "key": "sortBy",
-                  "value": "price"
-                },
-                {
-                  "key": "sortOrder",
-                  "value": "desc"
-                }
-              ]
-            },
-            "description": "Get books with pagination and sorting"
           },
           "response": []
         },
@@ -501,7 +403,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -524,7 +426,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
@@ -707,7 +609,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
@@ -749,7 +651,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -813,6 +715,13 @@
         }
       ],
       "description": "Order management endpoints"
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
     }
   ]
 }

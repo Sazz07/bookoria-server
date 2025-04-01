@@ -73,14 +73,7 @@ const getUserById = async (id: string) => {
   return user;
 };
 
-const updateUser = async (id: string, payload: Partial<TUser>) => {
-  if (payload.password) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      'Please use the change password endpoint',
-    );
-  }
-
+const updateUser = async (id: string, payload: Pick<TUser, 'role'>) => {
   const result = await User.findByIdAndUpdate(
     id,
     { ...payload },
