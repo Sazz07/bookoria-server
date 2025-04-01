@@ -33,6 +33,7 @@ const UserSchema = new mongoose.Schema<TUser, UserModel>(
     password: {
       type: String,
       required: true,
+      select: false,
     },
     image: {
       type: String,
