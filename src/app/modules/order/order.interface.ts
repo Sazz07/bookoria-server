@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { TUser } from '../user/user.interface';
-import { orderStatus, paymentMethod, paymentStatus } from './order.constant';
+import { ORDER_STATUS, paymentMethod, paymentStatus } from './order.constant';
 
 export type TOrderItem = {
   book: Types.ObjectId;
@@ -28,7 +28,7 @@ export type TPaymentInfo = {
   paidAt?: Date;
 };
 
-export type TOrderStatus = (typeof orderStatus)[number];
+export type TOrderStatus = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS];
 
 export type TOrder = {
   _id?: string;

@@ -83,7 +83,7 @@ const createOrderValidationSchema = z.object({
 
 const updateOrderStatusValidationSchema = z.object({
   body: z.object({
-    status: z.enum([...orderStatus], {
+    status: z.enum(orderStatus as [string, ...string[]], {
       required_error: 'Order status is required',
     }),
   }),

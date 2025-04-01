@@ -47,6 +47,7 @@ const bookSchema = new Schema<TBook>(
     isbn: {
       type: String,
       trim: true,
+      unique: true,
     },
     language: {
       type: String,

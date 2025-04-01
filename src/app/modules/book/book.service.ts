@@ -3,13 +3,48 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { TBook } from './book.interface';
 import { Book } from './book.model';
+import { Order } from '../order/order.model';
 
 const createBook = async (payload: TBook) => {
+  // Check if ISBN exists and is unique
+  if (payload.isbn) {
+    const existingBook = await Book.findOne({ isbn: payload.isbn });
+    if (existingBook) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        'A book with this ISBN already exists',
+      );
+    }
+  }
+
   const result = await Book.create(payload);
   return result;
 };
 
 const createBulkBooks = async (payload: TBook[]) => {
+  // Check for duplicate ISBNs within the payload
+  const isbns = payload.filter((book) => book.isbn).map((book) => book.isbn);
+
+  if (isbns.length !== new Set(isbns).size) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Duplicate ISBNs found in the payload',
+    );
+  }
+
+  // Check for existing ISBNs in the database
+  if (isbns.length > 0) {
+    const existingBooks = await Book.find({ isbn: { $in: isbns } });
+    if (existingBooks.length > 0) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        `Books with these ISBNs already exist: ${existingBooks
+          .map((book) => book.isbn)
+          .join(', ')}`,
+      );
+    }
+  }
+
   const result = await Book.insertMany(payload);
   return result;
 };
@@ -54,6 +89,34 @@ const updateBook = async (id: string, payload: Partial<TBook>) => {
 
   if (isBookExist.isDeleted) {
     throw new AppError(httpStatus.FORBIDDEN, 'Book is already deleted');
+  }
+
+  // Check if stock is being updated to a lower value
+  if (payload.stock !== undefined && payload.stock < isBookExist.stock) {
+    // Check if there are pending orders for this book
+    const pendingOrders = await Order.countDocuments({
+      'orderItems.book': id,
+      status: { $nin: ['Delivered', 'Cancelled'] },
+      isDeleted: false,
+    });
+    //
+    if (pendingOrders > 0 && payload.stock < pendingOrders) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        `Cannot reduce stock below ${pendingOrders} as there are pending orders`,
+      );
+    }
+  }
+
+  // Check if ISBN is being updated and is unique
+  if (payload.isbn && payload.isbn !== isBookExist.isbn) {
+    const existingBook = await Book.findOne({ isbn: payload.isbn });
+    if (existingBook) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        'A book with this ISBN already exists',
+      );
+    }
   }
 
   const result = await Book.findByIdAndUpdate(id, payload, {
