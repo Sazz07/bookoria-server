@@ -26,12 +26,41 @@ class QueryBuilder<T> {
   }
 
   filter() {
-    const queryObj = { ...this.query }; 
-    const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
+    const queryObj = { ...this.query };
+    const excludeFields = [
+      'searchTerm',
+      'sort',
+      'limit',
+      'page',
+      'fields',
+      'minPrice',
+      'maxPrice',
+    ];
 
     excludeFields.forEach((el) => delete queryObj[el]);
 
-    this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
+    // Handle range filtering (e.g., price range)
+    if (
+      this.query.minPrice !== undefined ||
+      this.query.maxPrice !== undefined
+    ) {
+      const priceFilter: Record<string, unknown> = {};
+
+      if (this.query.minPrice !== undefined) {
+        priceFilter.$gte = Number(this.query.minPrice);
+      }
+
+      if (this.query.maxPrice !== undefined) {
+        priceFilter.$lte = Number(this.query.maxPrice);
+      }
+
+      this.modelQuery = this.modelQuery.find({
+        ...queryObj,
+        price: priceFilter,
+      } as FilterQuery<T>);
+    } else {
+      this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
+    }
 
     return this;
   }
@@ -61,6 +90,7 @@ class QueryBuilder<T> {
     this.modelQuery = this.modelQuery.select(fields);
     return this;
   }
+
   async countTotal() {
     const totalQueries = this.modelQuery.getFilter();
     const total = await this.modelQuery.model.countDocuments(totalQueries);
