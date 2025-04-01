@@ -1,10 +1,9 @@
-import { Request, Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import httpStatus from 'http-status';
 import { UserService } from './user.service';
 
-const getMyProfile = catchAsync(async (req: Request, res: Response) => {
+const getMyProfile = catchAsync(async (req, res) => {
   const result = await UserService.getMyProfile(req.user);
 
   sendResponse(res, {
@@ -15,7 +14,7 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
+const updateMyProfile = catchAsync(async (req, res) => {
   const { userId } = req.user;
   const result = await UserService.updateMyProfile(userId, req.body);
 
@@ -27,7 +26,7 @@ const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+const getAllUsers = catchAsync(async (req, res) => {
   const result = await UserService.getAllUsers(req.query);
 
   sendResponse(res, {
@@ -39,7 +38,7 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getUserById = catchAsync(async (req: Request, res: Response) => {
+const getUserById = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await UserService.getUserById(id);
 
@@ -51,7 +50,7 @@ const getUserById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const updateUser = catchAsync(async (req: Request, res: Response) => {
+const updateUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await UserService.updateUser(id, req.body);
 
@@ -63,7 +62,7 @@ const updateUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const blockUser = catchAsync(async (req: Request, res: Response) => {
+const blockUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { userId } = req.user;
   const result = await UserService.blockUser(id, userId);
@@ -76,7 +75,7 @@ const blockUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const deleteUser = catchAsync(async (req: Request, res: Response) => {
+const deleteUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   await UserService.deleteUser(id);
 

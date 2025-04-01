@@ -1,0 +1,818 @@
+{
+  "info": {
+    "_postman_id": "b5e7a3d2-f8c4-4a9e-b5d3-c8f2e9d7a1b6",
+    "name": "Book Shop API",
+    "description": "API collection for Book Shop Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"firstName\": \"Rahim\",\n    \"middleName\": \"\",\n    \"lastName\": \"Ahmed\"\n  },\n  \"email\": \"rahim.ahmed@gmail.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"firstName\": \"Karim\",\n    \"middleName\": \"\",\n    \"lastName\": \"Khan\"\n  },\n  \"email\": \"karim.admin@gmail.com\",\n  \"password\": \"Admin123!\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new admin"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.data && jsonData.data.accessToken) {",
+                  "    pm.environment.set(\"token\", jsonData.data.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"rahim.ahmed@gmail.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login to get access token"
+          },
+          "response": []
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.data && jsonData.data.accessToken) {",
+                  "    pm.environment.set(\"adminToken\", jsonData.data.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"karim.admin@gmail.com\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login as admin to get admin access token"
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "change-password"]
+            },
+            "description": "Change user password"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication related endpoints"
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/my-profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "my-profile"]
+            },
+            "description": "Get current user profile"
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"firstName\": \"Rahim\",\n    \"middleName\": \"Uddin\",\n    \"lastName\": \"Ahmed\"\n  },\n  \"image\": \"https://i.pravatar.cc/300?img=11\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/my-profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "my-profile"]
+            },
+            "description": "Update current user profile"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            },
+            "description": "Get all users (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Get user by ID (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"firstName\": \"Rahim\",\n    \"lastName\": \"Ahmed\"\n  },\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Update user by ID (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Block User (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{userId}}/block",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId}}", "block"]
+            },
+            "description": "Block/unblock user (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Delete user (admin only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "User management endpoints"
+    },
+    {
+      "name": "Book",
+      "item": [
+        {
+          "name": "Create Book (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Pother Panchali\",\n  \"author\": \"Bibhutibhushan Bandyopadhyay\",\n  \"genre\": \"Fiction\",\n  \"description\": \"A classic novel depicting rural life in Bengal in the early 20th century.\",\n  \"price\": 350,\n  \"stock\": 50,\n  \"publicationDate\": \"1929-06-15\",\n  \"publisher\": \"Bangla Prokashoni\",\n  \"isbn\": \"9789849112532\",\n  \"language\": \"Bengali\",\n  \"pageCount\": 324,\n  \"coverImage\": \"https://m.media-amazon.com/images/I/51JVN8jXn6L._SY445_SX342_.jpg\",\n  \"format\": \"Paperback\",\n  \"discount\": 10,\n  \"featured\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/books",
+              "host": ["{{base_url}}"],
+              "path": ["books"]
+            },
+            "description": "Create a new book (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Bulk Books (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"title\": \"Chander Pahar\",\n    \"author\": \"Bibhutibhushan Bandyopadhyay\",\n    \"genre\": \"Adventure\",\n    \"description\": \"A thrilling adventure novel set in Africa.\",\n    \"price\": 320,\n    \"stock\": 40,\n    \"publicationDate\": \"1937-05-10\",\n    \"publisher\": \"Desh Publishing\",\n    \"isbn\": \"9789849112533\",\n    \"language\": \"Bengali\",\n    \"pageCount\": 280,\n    \"coverImage\": \"https://m.media-amazon.com/images/I/51Ht1mJUCnL._SY445_SX342_.jpg\",\n    \"format\": \"Paperback\",\n    \"discount\": 5\n  },\n  {\n    \"title\": \"Feluda Samagra\",\n    \"author\": \"Satyajit Ray\",\n    \"genre\": \"Mystery\",\n    \"description\": \"Collection of detective stories featuring the iconic Bengali detective Feluda.\",\n    \"price\": 550,\n    \"stock\": 30,\n    \"publicationDate\": \"1979-12-01\",\n    \"publisher\": \"Ananda Publishers\",\n    \"isbn\": \"9789849112534\",\n    \"language\": \"Bengali\",\n    \"pageCount\": 650,\n    \"coverImage\": \"https://m.media-amazon.com/images/I/51N9nZiqzQL._SY445_SX342_.jpg\",\n    \"format\": \"Hardcover\",\n    \"featured\": true\n  }\n]"
+            },
+            "url": {
+              "raw": "{{base_url}}/books/bulk",
+              "host": ["{{base_url}}"],
+              "path": ["books", "bulk"]
+            },
+            "description": "Create multiple books at once (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Books",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/books",
+              "host": ["{{base_url}}"],
+              "path": ["books"]
+            },
+            "description": "Get all books"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Books with Filtering",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/books?genre=Mystery&minPrice=300&maxPrice=600&featured=true",
+              "host": ["{{base_url}}"],
+              "path": ["books"],
+              "query": [
+                {
+                  "key": "genre",
+                  "value": "Mystery"
+                },
+                {
+                  "key": "minPrice",
+                  "value": "300"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "600"
+                },
+                {
+                  "key": "featured",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get books with filtering options"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Books with Search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/books?searchTerm=Satyajit",
+              "host": ["{{base_url}}"],
+              "path": ["books"],
+              "query": [
+                {
+                  "key": "searchTerm",
+                  "value": "Satyajit"
+                }
+              ]
+            },
+            "description": "Search books by title, author, or genre"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Books with Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/books?page=1&limit=10&sortBy=price&sortOrder=desc",
+              "host": ["{{base_url}}"],
+              "path": ["books"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "price"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Get books with pagination and sorting"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Book By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/books/{{bookId}}",
+              "host": ["{{base_url}}"],
+              "path": ["books", "{{bookId}}"]
+            },
+            "description": "Get book by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Book (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 380,\n  \"stock\": 60,\n  \"discount\": 15,\n  \"description\": \"Updated description for Pother Panchali, a classic novel depicting rural life in Bengal.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/books/{{bookId}}",
+              "host": ["{{base_url}}"],
+              "path": ["books", "{{bookId}}"]
+            },
+            "description": "Update book by ID (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Book (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/books/{{bookId}}",
+              "host": ["{{base_url}}"],
+              "path": ["books", "{{bookId}}"]
+            },
+            "description": "Delete book by ID (admin only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Book management endpoints"
+    },
+    {
+      "name": "Review",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"book\": \"{{bookId}}\",\n  \"rating\": 5,\n  \"comment\": \"An excellent book! One of the best novels in Bengali literature.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["reviews"]
+            },
+            "description": "Create a new review for a book"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Reviews by Book",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews/book/{{bookId}}",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "book", "{{bookId}}"]
+            },
+            "description": "Get all reviews for a specific book"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews/my-reviews",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "my-reviews"]
+            },
+            "description": "Get all reviews by the current user"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4,\n  \"comment\": \"A very good book, though some parts felt a bit lengthy.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/{{reviewId}}",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "{{reviewId}}"]
+            },
+            "description": "Update a review by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews/{{reviewId}}",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "{{reviewId}}"]
+            },
+            "description": "Delete a review by ID"
+          },
+          "response": []
+        }
+      ],
+      "description": "Book review endpoints"
+    },
+    {
+      "name": "Order",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderItems\": [\n    {\n      \"book\": \"{{bookId1}}\",\n      \"price\": 350,\n      \"quantity\": 2,\n      \"discount\": 10\n    },\n    {\n      \"book\": \"{{bookId2}}\",\n      \"price\": 320,\n      \"quantity\": 1,\n      \"discount\": 5\n    }\n  ],\n  \"shippingAddress\": {\n    \"name\": \"Rahim Ahmed\",\n    \"address\": \"House #45, Road #7, Block C\",\n    \"city\": \"Dhanmondi\",\n    \"postalCode\": \"1209\",\n    \"country\": \"Bangladesh\",\n    \"phone\": \"01712345678\"\n  },\n  \"paymentInfo\": {\n    \"method\": \"Mobile Banking\",\n    \"transactionId\": \"TXN123456789\",\n    \"status\": \"Completed\"\n  },\n  \"subtotal\": 1020,\n  \"shippingCost\": 80,\n  \"tax\": 102,\n  \"total\": 1202,\n  \"notes\": \"Please deliver in the evening after 6 PM.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
+            },
+            "description": "Create a new order"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/my-orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "my-orders"]
+            },
+            "description": "Get all orders for the current user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Orders (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
+            },
+            "description": "Get all orders (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/{{orderId}}",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{orderId}}"]
+            },
+            "description": "Get order by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order Status (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Processing\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/{{orderId}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{orderId}}", "status"]
+            },
+            "description": "Update order status (admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Order (User)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Cancelled\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/{{orderId}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{orderId}}", "status"]
+            },
+            "description": "Cancel an order (user)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/{{orderId}}",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{orderId}}"]
+            },
+            "description": "Delete an order"
+          },
+          "response": []
+        }
+      ],
+      "description": "Order management endpoints"
+    }
+  ]
+}

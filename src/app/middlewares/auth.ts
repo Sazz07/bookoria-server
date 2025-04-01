@@ -6,6 +6,7 @@ import httpStatus from 'http-status';
 import config from '../config';
 import { User } from '../modules/user/user.model';
 import { verifyToken } from '../modules/auth/auth.utils';
+import { JwtPayload } from 'jsonwebtoken';
 
 const auth = (...requiredRoles: TUserRole[]) =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -30,20 +31,20 @@ const auth = (...requiredRoles: TUserRole[]) =>
     }
 
     if (
-      user.passwordChangedAt &&
+      user?.passwordChangedAt &&
       User.isJWTissuedBeforePasswordChange(
         user.passwordChangedAt,
         iat as number,
       )
     ) {
-      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized !');
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
     }
 
     if (requiredRoles && !requiredRoles.includes(role)) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
     }
 
-    req.user = decoded;
+    req.user = decoded as JwtPayload;
     next();
   });
 

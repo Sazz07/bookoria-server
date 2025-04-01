@@ -80,7 +80,11 @@ UserSchema.post('save', async function (doc, next) {
 
 // virtual fullName
 UserSchema.virtual('fullName').get(function () {
-  return `${this.name?.firstName} ${this.name?.middleName} ${this.name?.lastName}`;
+  if (this.name?.middleName) {
+    return `${this.name?.firstName} ${this.name?.middleName} ${this.name?.lastName}`;
+  } else {
+    return `${this.name?.firstName} ${this.name?.lastName}`;
+  }
 });
 
 // Check user exist
@@ -97,11 +101,12 @@ UserSchema.statics.isPasswordMatched = async function (
 };
 
 // Check password changed after token issued
-UserSchema.statics.isJWTissuedBeforePasswordChange = async function (
+UserSchema.statics.isJWTissuedBeforePasswordChange = function (
   passwordChangedAt: Date,
   jwtIssuedTimestamp: number,
 ) {
-  return new Date(passwordChangedAt).getTime() / 1000 > jwtIssuedTimestamp;
+  const passwordChangedTime = new Date(passwordChangedAt).getTime() / 1000;
+  return passwordChangedTime > jwtIssuedTimestamp;
 };
 
 export const User = model<TUser, UserModel>('User', UserSchema);
