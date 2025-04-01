@@ -154,6 +154,17 @@ const updateOrderStatus = async (
     throw new AppError(httpStatus.FORBIDDEN, 'You can only cancel orders');
   }
 
+  // check if order is already delivered
+  if (
+    isOrderExist.status === ORDER_STATUS.DELIVERED &&
+    status === ORDER_STATUS.CANCELLED
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Cannot cancel an order that has already been delivered or cancelled',
+    );
+  }
+
   const updateData = {
     status,
     ...(status === ORDER_STATUS.DELIVERED ? { deliveredAt: new Date() } : {}),

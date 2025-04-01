@@ -8,7 +8,6 @@ export type TReview = {
   book: Types.ObjectId | TBook;
   rating: number;
   comment: string;
-  isDeleted?: boolean;
 };
 
 export interface ReviewModel extends Model<TReview> {

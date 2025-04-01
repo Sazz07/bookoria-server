@@ -26,10 +26,6 @@ const reviewSchema = new Schema<TReview, ReviewModel>(
       required: [true, 'Review comment is required'],
       trim: true,
     },
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     timestamps: true,
@@ -40,22 +36,11 @@ const reviewSchema = new Schema<TReview, ReviewModel>(
   },
 );
 
-// Query middleware to exclude deleted reviews
-reviewSchema.pre('find', function (next) {
-  this.find({ isDeleted: { $ne: true } });
-  next();
-});
-
-reviewSchema.pre('findOne', function (next) {
-  this.find({ isDeleted: { $ne: true } });
-  next();
-});
-
 // Static method to calculate average rating for a book
 reviewSchema.statics.calculateAverageRating = async function (bookId) {
   const result = await this.aggregate([
     {
-      $match: { book: bookId, isDeleted: { $ne: true } },
+      $match: { book: bookId },
     },
     {
       $group: {

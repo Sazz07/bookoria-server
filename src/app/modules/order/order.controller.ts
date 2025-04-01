@@ -6,7 +6,7 @@ import { OrderService } from './order.service';
 import { USER_ROLE } from '../user/user.constant';
 
 const createOrder = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user._id;
+  const { userId } = req.user;
   const result = await OrderService.createOrder(userId, req.body);
 
   sendResponse(res, {
@@ -30,7 +30,7 @@ const getAllOrders = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getOrdersByUser = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user._id;
+  const { userId } = req.user;
   const result = await OrderService.getOrdersByUser(userId, req.query);
 
   sendResponse(res, {
@@ -44,7 +44,8 @@ const getOrdersByUser = catchAsync(async (req: Request, res: Response) => {
 
 const getOrderById = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const userId = req.user.role === 'admin' ? undefined : req.user._id;
+  const { userId } = req.user;
+
   const result = await OrderService.getOrderById(id, userId);
 
   sendResponse(res, {
@@ -58,8 +59,14 @@ const getOrderById = catchAsync(async (req, res) => {
 const updateOrderStatus = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  const userId = req.user.role === USER_ROLE.ADMIN ? undefined : req.user._id;
-  const result = await OrderService.updateOrderStatus(id, status, userId);
+  const { userId, role } = req.user;
+  const nonAdminUserId = role === USER_ROLE.ADMIN ? undefined : userId;
+
+  const result = await OrderService.updateOrderStatus(
+    id,
+    status,
+    nonAdminUserId,
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -71,8 +78,10 @@ const updateOrderStatus = catchAsync(async (req, res) => {
 
 const deleteOrder = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const userId = req.user.role === USER_ROLE.ADMIN ? undefined : req.user._id;
-  const result = await OrderService.deleteOrder(id, userId);
+  const { userId, role } = req.user;
+  const nonAdminUserId = role === USER_ROLE.ADMIN ? undefined : userId;
+
+  const result = await OrderService.deleteOrder(id, nonAdminUserId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
