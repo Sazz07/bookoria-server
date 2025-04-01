@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { TBook } from './book.interface';
-import { bookFormat } from './book.constant';
+import { bookFormat, bookGenres } from './book.constant';
 
 const bookSchema = new Schema<TBook>(
   {
@@ -17,6 +17,10 @@ const bookSchema = new Schema<TBook>(
     genre: {
       type: String,
       required: [true, 'Genre is required'],
+      enum: {
+        values: bookGenres,
+        message: '{VALUE} is not a valid genre',
+      },
       trim: true,
     },
     description: {

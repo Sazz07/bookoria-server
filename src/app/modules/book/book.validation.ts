@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { bookFormat } from './book.constant';
+import { bookFormat, bookGenres } from './book.constant';
 
 const createBookValidationSchema = z.object({
   body: z.object({
@@ -9,8 +9,9 @@ const createBookValidationSchema = z.object({
     author: z.string({
       required_error: 'Author is required',
     }),
-    genre: z.string({
+    genre: z.enum([...bookGenres] as [string, ...string[]], {
       required_error: 'Genre is required',
+      invalid_type_error: 'Genre must be a valid book genre',
     }),
     description: z.string({
       required_error: 'Description is required',
@@ -42,7 +43,7 @@ const updateBookValidationSchema = z.object({
   body: z.object({
     title: z.string().optional(),
     author: z.string().optional(),
-    genre: z.string().optional(),
+    genre: z.enum([...bookGenres] as [string, ...string[]]).optional(),
     description: z.string().optional(),
     price: z.number().min(0, 'Price cannot be negative').optional(),
     stock: z.number().min(0, 'Stock cannot be negative').optional(),

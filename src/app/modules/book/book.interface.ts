@@ -1,10 +1,14 @@
+import { BOOK_GENRE } from './book.constant';
+
 export type TFormat = 'Hardcover' | 'Paperback' | 'E-book' | 'Audiobook';
+
+export type TBookGenre = (typeof BOOK_GENRE)[keyof typeof BOOK_GENRE];
 
 export type TBook = {
   _id?: string;
   title: string;
   author: string;
-  genre: string;
+  genre: TBookGenre;
   description: string;
   price: number;
   stock: number;
