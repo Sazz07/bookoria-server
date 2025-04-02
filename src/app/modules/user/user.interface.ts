@@ -12,12 +12,17 @@ export type TUserRole = (typeof USER_ROLE)[keyof typeof USER_ROLE];
 
 export type TUser = {
   _id: string;
-  name: TUserName;
+  name: {
+    firstName: string;
+    middleName?: string;
+    lastName: string;
+  };
   email: string;
   password: string;
   image?: string;
-  role: TUserRole;
-  isBlocked?: boolean;
+  role: 'user' | 'admin';
+  isBlocked: boolean;
+  isDeleted: boolean;
   passwordChangedAt?: Date;
 };
 

@@ -5,8 +5,16 @@ import AppError from '../../errors/AppError';
 import { Review } from './review.model';
 import mongoose from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { User } from '../user/user.model';
 
 const createReview = async (userId: string, payload: TReview) => {
+  // Check if user exists and is not deleted
+  const user = await User.findOne({ _id: userId, isDeleted: false });
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
   const book = await Book.findById(payload.book);
   if (!book) {
     throw new AppError(httpStatus.NOT_FOUND, 'Book not found');
@@ -92,7 +100,7 @@ const updateReview = async (
   }
 
   // Check if the review belongs to the user
-  if (review.user.toString() !== userId) {
+  if (review.user?.toString() !== userId) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       'You are not authorized to update this review',
@@ -114,8 +122,7 @@ const deleteReview = async (userId: string, reviewId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, 'Review not found');
   }
 
-  // Check if the review belongs to the user
-  if (review.user.toString() !== userId) {
+  if (review.user?.toString() !== userId) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       'You are not authorized to delete this review',

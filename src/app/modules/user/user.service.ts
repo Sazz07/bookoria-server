@@ -8,7 +8,8 @@ const getMyProfile = async (user: JwtPayload) => {
   const result = await User.findOne({
     email: user.email,
     isBlocked: false,
-  }).select('-isBlocked -createdAt -updatedAt -password');
+    isDeleted: false,
+  }).select('-isBlocked -isDeleted -createdAt -updatedAt -password');
 
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
@@ -29,15 +30,17 @@ const updateMyProfile = async (userId: string, payload: Partial<TUser>) => {
     );
   }
 
+  const user = await User.findOne({ _id: userId, isDeleted: false });
+  
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
   const result = await User.findByIdAndUpdate(
     userId,
     { ...payload },
     { new: true, runValidators: true },
   ).select('-password');
-
-  if (!result) {
-    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
-  }
 
   return result;
 };

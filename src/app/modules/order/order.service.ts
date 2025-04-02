@@ -8,6 +8,7 @@ import { ORDER_STATUS } from './order.constant';
 import { orderUtils } from './order.utils';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { JwtPayload } from 'jsonwebtoken';
+import { User } from '../user/user.model';
 
 const createOrder = async (
   user: JwtPayload,
@@ -15,6 +16,13 @@ const createOrder = async (
   clientIp: string,
 ) => {
   const { userId, email } = user;
+
+  const isUserExist = await User.findOne({ _id: userId, isDeleted: false });
+
+  if (!isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
   if (payload.user && payload.user.toString() !== userId) {
     throw new AppError(
       httpStatus.FORBIDDEN,
@@ -237,8 +245,7 @@ const getOrderById = async (id: string, userId?: string) => {
     throw new AppError(httpStatus.NOT_FOUND, 'Order not found');
   }
 
-  // Check if user is authorized to view this order
-  if (userId && result.user._id.toString() !== userId) {
+  if (userId && result.user._id?.toString() !== userId) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       'You are not authorized to view this order',

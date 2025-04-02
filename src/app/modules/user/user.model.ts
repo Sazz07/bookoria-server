@@ -48,6 +48,10 @@ const UserSchema = new mongoose.Schema<TUser, UserModel>(
       type: Boolean,
       default: false,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
     passwordChangedAt: {
       type: Date,
     },
@@ -89,7 +93,7 @@ UserSchema.virtual('fullName').get(function () {
 
 // Check user exist
 UserSchema.statics.isUserExist = async function (email: string) {
-  return await User.findOne({ email }).select('+password');
+  return await User.findOne({ email }).select('+password +isDeleted');
 };
 
 // Check password

@@ -6,7 +6,7 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import { TUserUpdatePayload } from './admin.interface';
 
 const getAllUsers = async (query: Record<string, unknown>) => {
-  const userQuery = new QueryBuilder(User.find(), query)
+  const userQuery = new QueryBuilder(User.find({ isDeleted: false }), query)
     .search(['email', 'name.firstName', 'name.lastName'])
     .filter()
     .sort()
@@ -23,7 +23,9 @@ const getAllUsers = async (query: Record<string, unknown>) => {
 };
 
 const getUserById = async (id: string) => {
-  const user = await User.findById(id).select('-password');
+  const user = await User.findOne({ _id: id, isDeleted: false }).select(
+    '-password',
+  );
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
@@ -33,15 +35,17 @@ const getUserById = async (id: string) => {
 };
 
 const updateUser = async (id: string, payload: TUserUpdatePayload) => {
+  const user = await User.findOne({ _id: id, isDeleted: false });
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
   const result = await User.findByIdAndUpdate(
     id,
     { ...payload },
     { new: true, runValidators: true },
   ).select('-password');
-
-  if (!result) {
-    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
-  }
 
   return result;
 };
@@ -53,7 +57,7 @@ const blockUser = async (targetUserId: string, adminId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  if (targetUser._id.toString() === adminId) {
+  if (targetUser._id?.toString() === adminId) {
     throw new AppError(httpStatus.BAD_REQUEST, 'You cannot block yourself');
   }
 
@@ -76,7 +80,15 @@ const deleteUser = async (id: string) => {
       throw new AppError(httpStatus.NOT_FOUND, 'User not found');
     }
 
-    const result = await User.findByIdAndDelete(id);
+    if (user.isDeleted) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'User is already deleted');
+    }
+
+    const result = await User.findByIdAndUpdate(
+      id,
+      { isDeleted: true },
+      { new: true, runValidators: true },
+    ).select('-password');
 
     await session.commitTransaction();
     session.endSession();

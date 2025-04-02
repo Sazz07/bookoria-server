@@ -42,45 +42,51 @@ const userRegister = async (payload: TRegister) => {
   return { accessToken, refreshToken };
 };
 
+// In the userLogin function
 const userLogin = async (payload: TLogin) => {
+  // Check if user exists with email
   const user = await User.isUserExist(payload.email);
-
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  if (user?.isBlocked) {
-    throw new AppError(httpStatus.UNAUTHORIZED, 'User is blocked');
+  // Check if user is deleted
+  if (user.isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, 'User has been deleted');
   }
 
-  const isPasswordMatched = await User.isPasswordMatched(
-    payload.password,
-    user.password,
-  );
-
-  if (!isPasswordMatched) {
-    throw new AppError(httpStatus.UNAUTHORIZED, 'Password not matched');
+  // Check if user is blocked
+  if (user.isBlocked) {
+    throw new AppError(httpStatus.FORBIDDEN, 'User is blocked');
   }
 
-  const JwtPayload: TJwtPayload = {
-    userId: user._id,
+  // Check if password is correct
+  if (!(await User.isPasswordMatched(payload.password, user.password))) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Password is incorrect');
+  }
+
+  const jwtPayload = {
+    userId: user._id.toString(),
     email: user.email,
     role: user.role,
   };
 
   const accessToken = createToken(
-    JwtPayload,
+    jwtPayload,
     config.jwt_access_secret as string,
     config.jwt_access_expires_in as string,
   );
 
   const refreshToken = createToken(
-    JwtPayload,
+    jwtPayload,
     config.jwt_refresh_secret as string,
     config.jwt_refresh_expires_in as string,
   );
 
-  return { accessToken, refreshToken };
+  return {
+    accessToken,
+    refreshToken,
+  };
 };
 
 const changePassword = async (
@@ -174,7 +180,7 @@ const forgetPassword = async (email: string) => {
   }
 
   const JwtPayload: TJwtPayload = {
-    userId: user._id,
+    userId: user._id.toString(),
     email: user.email,
     role: user.role,
   };
