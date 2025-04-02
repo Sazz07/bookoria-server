@@ -28,7 +28,7 @@ export type TPaymentInfo = {
   paidAt?: Date;
 };
 
-// Add transaction details for ShurjoPay
+// Transaction details for ShurjoPay
 export type TTransaction = {
   id: string;
   transactionStatus: string;
