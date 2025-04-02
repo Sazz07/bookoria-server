@@ -1,13 +1,14 @@
-import { Router } from 'express';
+import express from 'express';
 import { AuthRoutes } from '../modules/auth/auth.route';
+import { UserRoutes } from '../modules/user/user.route';
 import { BookRoutes } from '../modules/book/book.route';
 import { OrderRoutes } from '../modules/order/order.route';
 import { ReviewRoutes } from '../modules/review/review.route';
-import { UserRoutes } from '../modules/user/user.route';
+import { AdminRoutes } from '../modules/admin/admin.route';
 
-const router = Router();
+const router = express.Router();
 
-const moduleRoutes: { path: string; route: Router }[] = [
+const moduleRoutes = [
   {
     path: '/auth',
     route: AuthRoutes,
@@ -16,7 +17,10 @@ const moduleRoutes: { path: string; route: Router }[] = [
     path: '/users',
     route: UserRoutes,
   },
-
+  {
+    path: '/admin/users',
+    route: AdminRoutes,
+  },
   {
     path: '/books',
     route: BookRoutes,

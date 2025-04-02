@@ -21,18 +21,4 @@ router.patch(
   UserController.updateMyProfile,
 );
 
-// Admin only routes
-router.get('/', auth(USER_ROLE.ADMIN), UserController.getAllUsers);
-router.get('/:id', auth(USER_ROLE.ADMIN), UserController.getUserById);
-
-router.patch(
-  '/:id',
-  auth(USER_ROLE.ADMIN),
-  validateRequest(UserValidation.updateUserValidationSchema),
-  UserController.updateUser,
-);
-
-router.patch('/:id/block', auth(USER_ROLE.ADMIN), UserController.blockUser);
-router.delete('/:id', auth(USER_ROLE.ADMIN), UserController.deleteUser);
-
 export const UserRoutes = router;
