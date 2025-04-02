@@ -1,13 +1,18 @@
-import { Request, Response } from 'express';
-import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
+import httpStatus from 'http-status';
+import { JwtPayload } from 'jsonwebtoken';
 import { OrderService } from './order.service';
 import { USER_ROLE } from '../user/user.constant';
 
-const createOrder = catchAsync(async (req: Request, res: Response) => {
-  const { userId } = req.user;
-  const result = await OrderService.createOrder(userId, req.body);
+const createOrder = catchAsync(async (req, res) => {
+  const user = req.user;
+
+  const result = await OrderService.createOrder(
+    user,
+    req.body,
+    req.ip || '127.0.0.1',
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -17,7 +22,7 @@ const createOrder = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getAllOrders = catchAsync(async (req: Request, res: Response) => {
+const getAllOrders = catchAsync(async (req, res) => {
   const result = await OrderService.getAllOrders(req.query);
 
   sendResponse(res, {
@@ -29,9 +34,9 @@ const getAllOrders = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getOrdersByUser = catchAsync(async (req: Request, res: Response) => {
-  const { userId } = req.user;
-  const result = await OrderService.getOrdersByUser(userId, req.query);
+const getOrdersByUser = catchAsync(async (req, res) => {
+  const user = req.user as JwtPayload;
+  const result = await OrderService.getOrdersByUser(user.userId, req.query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -43,10 +48,11 @@ const getOrdersByUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getOrderById = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const { userId } = req.user;
-
-  const result = await OrderService.getOrderById(id, userId);
+  const user = req.user;
+  const result = await OrderService.getOrderById(
+    req.params.id,
+    user.role === USER_ROLE.USER ? user.userId : undefined,
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -57,15 +63,11 @@ const getOrderById = catchAsync(async (req, res) => {
 });
 
 const updateOrderStatus = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-  const { userId, role } = req.user;
-  const nonAdminUserId = role === USER_ROLE.ADMIN ? undefined : userId;
-
+  const user = req.user;
   const result = await OrderService.updateOrderStatus(
-    id,
-    status,
-    nonAdminUserId,
+    req.params.id,
+    req.body.status,
+    user.role === USER_ROLE.USER ? user.userId : undefined,
   );
 
   sendResponse(res, {
@@ -76,17 +78,28 @@ const updateOrderStatus = catchAsync(async (req, res) => {
   });
 });
 
-const deleteOrder = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { userId, role } = req.user;
-  const nonAdminUserId = role === USER_ROLE.ADMIN ? undefined : userId;
-
-  const result = await OrderService.deleteOrder(id, nonAdminUserId);
+const deleteOrder = catchAsync(async (req, res) => {
+  const user = req.user;
+  const result = await OrderService.deleteOrder(
+    req.params.id,
+    user.role === USER_ROLE.USER ? user.userId : undefined,
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Order deleted successfully',
+    data: result,
+  });
+});
+
+const verifyPayment = catchAsync(async (req, res) => {
+  const result = await OrderService.verifyPayment(req.query.order_id as string);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Payment verified successfully',
     data: result,
   });
 });
@@ -98,4 +111,5 @@ export const OrderController = {
   getOrderById,
   updateOrderStatus,
   deleteOrder,
+  verifyPayment,
 };

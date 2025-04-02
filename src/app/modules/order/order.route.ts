@@ -7,6 +7,12 @@ import { OrderValidation } from './order.validation';
 
 const router = express.Router();
 
+router.get(
+  '/verify',
+  auth(USER_ROLE.USER, USER_ROLE.ADMIN),
+  OrderController.verifyPayment,
+);
+
 router.post(
   '/',
   auth(USER_ROLE.USER),

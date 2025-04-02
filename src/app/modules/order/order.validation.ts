@@ -1,23 +1,6 @@
 import { z } from 'zod';
 import { orderStatus, paymentMethod, paymentStatus } from './order.constant';
 
-const orderItemValidationSchema = z.object({
-  book: z.string({
-    required_error: 'Book ID is required',
-  }),
-  price: z
-    .number({
-      required_error: 'Book price is required',
-    })
-    .min(0, 'Price cannot be negative'),
-  quantity: z
-    .number({
-      required_error: 'Quantity is required',
-    })
-    .min(1, 'Quantity must be at least 1'),
-  discount: z.number().min(0).max(100).optional(),
-});
-
 const shippingAddressValidationSchema = z.object({
   name: z.string({
     required_error: 'Name is required',
@@ -51,32 +34,30 @@ const paymentInfoValidationSchema = z.object({
 const createOrderValidationSchema = z.object({
   body: z.object({
     orderItems: z
-      .array(orderItemValidationSchema, {
-        required_error: 'Order items are required',
-      })
+      .array(
+        z.object({
+          book: z.string({
+            required_error: 'Book ID is required',
+          }),
+          quantity: z
+            .number({
+              required_error: 'Quantity is required',
+            })
+            .min(1, 'Quantity must be at least 1'),
+          discount: z.number().min(0).max(100).optional(),
+        }),
+        {
+          required_error: 'Order items are required',
+        },
+      )
       .min(1, 'At least one order item is required'),
     shippingAddress: shippingAddressValidationSchema,
     paymentInfo: paymentInfoValidationSchema,
-    subtotal: z
-      .number({
-        required_error: 'Subtotal is required',
-      })
-      .min(0, 'Subtotal cannot be negative'),
     shippingCost: z
       .number({
         required_error: 'Shipping cost is required',
       })
       .min(0, 'Shipping cost cannot be negative'),
-    tax: z
-      .number({
-        required_error: 'Tax is required',
-      })
-      .min(0, 'Tax cannot be negative'),
-    total: z
-      .number({
-        required_error: 'Total is required',
-      })
-      .min(0, 'Total cannot be negative'),
     notes: z.string().optional(),
   }),
 });

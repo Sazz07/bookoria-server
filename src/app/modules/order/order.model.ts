@@ -4,6 +4,7 @@ import {
   TOrderItem,
   TPaymentInfo,
   TShippingAddress,
+  TTransaction,
 } from './order.interface';
 import { orderStatus, paymentMethod, paymentStatus } from './order.constant';
 
@@ -75,6 +76,30 @@ const paymentInfoSchema = new Schema<TPaymentInfo>({
   },
 });
 
+const transactionSchema = new Schema<TTransaction>({
+  id: {
+    type: String,
+  },
+  transactionStatus: {
+    type: String,
+  },
+  bank_status: {
+    type: String,
+  },
+  sp_code: {
+    type: String,
+  },
+  sp_message: {
+    type: String,
+  },
+  method: {
+    type: String,
+  },
+  date_time: {
+    type: String,
+  },
+});
+
 const orderSchema = new Schema<TOrder>(
   {
     user: {
@@ -99,6 +124,9 @@ const orderSchema = new Schema<TOrder>(
     paymentInfo: {
       type: paymentInfoSchema,
       required: [true, 'Payment information is required'],
+    },
+    transaction: {
+      type: transactionSchema,
     },
     subtotal: {
       type: Number,

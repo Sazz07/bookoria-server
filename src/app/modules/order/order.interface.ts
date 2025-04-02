@@ -28,6 +28,17 @@ export type TPaymentInfo = {
   paidAt?: Date;
 };
 
+// Add transaction details for ShurjoPay
+export type TTransaction = {
+  id: string;
+  transactionStatus: string;
+  bank_status?: string;
+  sp_code?: string;
+  sp_message?: string;
+  method?: string;
+  date_time?: string;
+};
+
 export type TOrderStatus = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS];
 
 export type TOrder = {
@@ -36,6 +47,7 @@ export type TOrder = {
   orderItems: TOrderItem[];
   shippingAddress: TShippingAddress;
   paymentInfo: TPaymentInfo;
+  transaction?: TTransaction;
   subtotal: number;
   shippingCost: number;
   tax: number;

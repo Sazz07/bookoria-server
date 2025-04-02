@@ -1,14 +1,20 @@
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import QueryBuilder from '../../builder/QueryBuilder';
-import AppError from '../../errors/AppError';
-import { Book } from '../book/book.model';
 import { TOrder, TOrderStatus } from './order.interface';
 import { Order } from './order.model';
+import { Book } from '../book/book.model';
+import AppError from '../../errors/AppError';
 import { ORDER_STATUS } from './order.constant';
+import { orderUtils } from './order.utils';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { JwtPayload } from 'jsonwebtoken';
 
-const createOrder = async (userId: string, payload: TOrder) => {
-  // Ensure user can only order for themselves
+const createOrder = async (
+  user: JwtPayload,
+  payload: Partial<TOrder>,
+  clientIp: string,
+) => {
+  const { userId, email } = user;
   if (payload.user && payload.user.toString() !== userId) {
     throw new AppError(
       httpStatus.FORBIDDEN,
@@ -21,11 +27,13 @@ const createOrder = async (userId: string, payload: TOrder) => {
   session.startTransaction();
 
   try {
-    // Set the user ID
-    payload.user = new mongoose.Types.ObjectId(userId);
+    payload.user = userId;
+
+    let subtotal = 0;
+    const enrichedOrderItems = [];
 
     // Check if all books exist and have enough stock
-    for (const item of payload.orderItems) {
+    for (const item of payload.orderItems || []) {
       const book = await Book.findById(item.book);
 
       if (!book) {
@@ -41,14 +49,18 @@ const createOrder = async (userId: string, payload: TOrder) => {
           `Not enough stock for book: ${book.title}. Available: ${book.stock}`,
         );
       }
+      const price = book.price;
 
-      // Validate price matches the book price
-      if (item.price !== book.price) {
-        throw new AppError(
-          httpStatus.BAD_REQUEST,
-          `Invalid price for book: ${book.title}. Expected: ${book.price}`,
-        );
-      }
+      // Calculate item total with discount
+      const discount = item.discount || 0;
+      const itemTotal = price * item.quantity * (1 - discount / 100);
+      subtotal += itemTotal;
+
+      // Add price to order item
+      enrichedOrderItems.push({
+        ...item,
+        price,
+      });
 
       // Update book stock
       await Book.findByIdAndUpdate(
@@ -58,20 +70,126 @@ const createOrder = async (userId: string, payload: TOrder) => {
       );
     }
 
-    // Create the order
-    const result = await Order.create([payload], { session });
+    // Replace order items with enriched ones
+    payload.orderItems = enrichedOrderItems;
 
-    // Commit the transaction
+    // Calculate tax and total
+    const shippingCost = payload.shippingCost || 0;
+    const tax = Math.round(subtotal * 0.1); // 10% tax
+    const total = subtotal + shippingCost + tax;
+
+    payload.subtotal = subtotal;
+    payload.tax = tax;
+    payload.total = total;
+    payload.status = ORDER_STATUS.PENDING;
+
+    const order = await Order.create([payload], { session });
+    const createdOrder = order[0];
+
+    if (payload.paymentInfo?.method !== 'Cash On Delivery') {
+      try {
+        const paymentPayload = {
+          amount: total,
+          order_id: createdOrder._id.toString(),
+          currency: 'BDT',
+          customer_name: payload.shippingAddress?.name || '',
+          customer_address: payload.shippingAddress?.address || '',
+          customer_phone: payload.shippingAddress?.phone || '',
+          customer_city: payload.shippingAddress?.city || '',
+          customer_email: email,
+          client_ip: clientIp,
+        };
+
+        // Make payment
+        const payment = await orderUtils.makePaymentAsync(paymentPayload);
+
+        if (payment?.sp_order_id) {
+          await Order.findByIdAndUpdate(
+            createdOrder._id,
+            {
+              transaction: {
+                id: payment.sp_order_id,
+                transactionStatus: payment.transactionStatus,
+              },
+            },
+            { session },
+          );
+        }
+
+        // Commit the transaction
+        await session.commitTransaction();
+        session.endSession();
+
+        return {
+          order: createdOrder,
+          paymentUrl: payment.checkout_url,
+        };
+      } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
+      }
+    }
     await session.commitTransaction();
     session.endSession();
 
-    return result[0];
+    return { order: createdOrder };
   } catch (error) {
-    // Abort the transaction on error
     await session.abortTransaction();
     session.endSession();
     throw error;
   }
+};
+
+const verifyPayment = async (orderId: string) => {
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Order not found');
+  }
+
+  if (!order.transaction?.id) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'No transaction found for this order',
+    );
+  }
+
+  const verifiedPayment = await orderUtils.verifyPaymentAsync(
+    order.transaction.id,
+  );
+
+  if (verifiedPayment.length) {
+    const paymentData = verifiedPayment[0];
+
+    // Update order with payment verification details
+    await Order.findByIdAndUpdate(orderId, {
+      'transaction.bank_status': paymentData.bank_status,
+      'transaction.sp_code': paymentData.sp_code.toString(),
+      'transaction.sp_message': paymentData.sp_message,
+      'transaction.transactionStatus': paymentData.transaction_status,
+      'transaction.method': paymentData.method,
+      'transaction.date_time': paymentData.date_time,
+      status:
+        paymentData.bank_status === 'Success'
+          ? ORDER_STATUS.PROCESSING
+          : paymentData.bank_status === 'Failed'
+            ? ORDER_STATUS.PENDING
+            : paymentData.bank_status === 'Cancel'
+              ? ORDER_STATUS.CANCELLED
+              : order.status,
+      'paymentInfo.status':
+        paymentData.bank_status === 'Success'
+          ? 'Completed'
+          : paymentData.bank_status === 'Failed'
+            ? 'Failed'
+            : 'Pending',
+      'paymentInfo.paidAt':
+        paymentData.bank_status === 'Success' ? new Date() : undefined,
+    });
+  }
+
+  return verifiedPayment;
 };
 
 const getAllOrders = async (query: Record<string, unknown>) => {
@@ -240,4 +358,5 @@ export const OrderService = {
   getOrderById,
   updateOrderStatus,
   deleteOrder,
+  verifyPayment,
 };
