@@ -6,7 +6,13 @@ import { ReviewService } from './review.service';
 
 const createReview = catchAsync(async (req, res) => {
   const { userId } = req.user;
-  const result = await ReviewService.createReview(userId, req.body);
+  const { bookId } = req.params;
+  const reviewData = {
+    ...req.body,
+    book: bookId,
+  };
+
+  const result = await ReviewService.createReview(userId, reviewData);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,

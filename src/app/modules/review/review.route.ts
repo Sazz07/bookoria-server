@@ -7,19 +7,19 @@ import { ReviewValidation } from './review.validation';
 
 const router = express.Router();
 
-router.post(
-  '/',
-  auth(USER_ROLE.USER),
-  validateRequest(ReviewValidation.createReviewValidationSchema),
-  ReviewController.createReview,
-);
-
-router.get('/book/:bookId', ReviewController.getReviewsByBook);
-
 router.get(
   '/my-reviews',
   auth(USER_ROLE.USER),
   ReviewController.getReviewsByUser,
+);
+
+router.get('/book/:bookId', ReviewController.getReviewsByBook);
+
+router.post(
+  '/book/:bookId',
+  auth(USER_ROLE.USER),
+  validateRequest(ReviewValidation.createReviewValidationSchema),
+  ReviewController.createReview,
 );
 
 router.patch(
