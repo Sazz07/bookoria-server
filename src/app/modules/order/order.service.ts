@@ -229,7 +229,15 @@ const getOrdersByUser = async (
     .paginate()
     .fields();
 
-  const result = await orderQuery.modelQuery;
+  const result = await orderQuery.modelQuery
+    .populate({
+      path: 'orderItems.book',
+      select: 'title author coverImage',
+    })
+    .populate({
+      path: 'user',
+      select: 'name email',
+    });
   const meta = await orderQuery.countTotal();
 
   return {
