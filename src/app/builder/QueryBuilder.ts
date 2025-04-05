@@ -27,40 +27,78 @@ class QueryBuilder<T> {
 
   filter() {
     const queryObj = { ...this.query };
-    const excludeFields = [
-      'searchTerm',
-      'sort',
-      'limit',
-      'page',
-      'fields',
-      'minPrice',
-      'maxPrice',
-    ];
 
-    excludeFields.forEach((el) => delete queryObj[el]);
+    // Exclude fields that are not for filtering
+    const excludedFields = ['page', 'searchTerm', 'sort', 'limit', 'fields'];
 
-    // Handle range filtering (e.g., price range)
-    if (
-      this.query.minPrice !== undefined ||
-      this.query.maxPrice !== undefined
-    ) {
-      const priceFilter: Record<string, unknown> = {};
+    excludedFields.forEach((field) => delete queryObj[field]);
 
-      if (this.query.minPrice !== undefined) {
-        priceFilter.$gte = Number(this.query.minPrice);
+    let discountFilter: { discount: Record<string, number> } | null = null;
+    if (queryObj.discount !== undefined) {
+      if (queryObj.discount === 'true') {
+        discountFilter = { discount: { $gt: 0 } };
       }
 
-      if (this.query.maxPrice !== undefined) {
-        priceFilter.$lte = Number(this.query.maxPrice);
-      }
-
-      this.modelQuery = this.modelQuery.find({
-        ...queryObj,
-        price: priceFilter,
-      } as FilterQuery<T>);
-    } else {
-      this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
+      delete queryObj.discount;
     }
+
+    // Handle genre filter
+    let genreFilter: { genre: { $in: string[] } } | null = null;
+    if (
+      queryObj.genre &&
+      typeof queryObj.genre === 'string' &&
+      queryObj.genre.includes(',')
+    ) {
+      const genreArray = queryObj.genre.split(',');
+      genreFilter = { genre: { $in: genreArray } };
+      delete queryObj.genre;
+    }
+
+    // Handle price range filters
+    let priceFilter: { price: Record<string, number> } | null = null;
+
+    if (queryObj.minPrice !== undefined || queryObj.maxPrice !== undefined) {
+      priceFilter = { price: {} };
+
+      if (queryObj.minPrice !== undefined) {
+        priceFilter.price.$gte = Number(queryObj.minPrice);
+        delete queryObj.minPrice;
+      }
+
+      if (queryObj.maxPrice !== undefined) {
+        priceFilter.price.$lte = Number(queryObj.maxPrice);
+        delete queryObj.maxPrice;
+      }
+    }
+
+    // Handle featured filter
+    if (queryObj.featured === 'true') {
+      queryObj.featured = true;
+    }
+
+    // Process operators ($gt, $lt, etc.)
+    const filterString = JSON.stringify(queryObj);
+    const modifiedQuery = filterString.replace(
+      /\b(gt|gte|lt|lte|eq|ne|in)\b/g,
+      (match) => `$${match}`,
+    );
+
+    // Parse the modified query
+    const parsedQuery = JSON.parse(modifiedQuery);
+
+    if (genreFilter) {
+      Object.assign(parsedQuery, genreFilter);
+    }
+
+    if (priceFilter) {
+      Object.assign(parsedQuery, priceFilter);
+    }
+
+    if (discountFilter) {
+      Object.assign(parsedQuery, discountFilter);
+    }
+
+    this.modelQuery = this.modelQuery.find(parsedQuery);
 
     return this;
   }
