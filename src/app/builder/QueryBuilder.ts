@@ -104,9 +104,37 @@ class QueryBuilder<T> {
   }
 
   sort() {
-    const sort =
-      (this?.query?.sort as string)?.split(',')?.join(' ') || '-createdAt';
-    this.modelQuery = this.modelQuery.sort(sort as string);
+    if (!this.query.sort) {
+      // Default sort by createdAt descending if no sort parameter
+      this.modelQuery = this.modelQuery.sort('-createdAt');
+      return this;
+    }
+
+    const sortParam = this.query.sort as string;
+
+    // Special case for discountedPrice sorting
+    if (sortParam.startsWith('discountedPrice')) {
+      const order = sortParam.includes('desc') ? -1 : 1;
+
+      if (order === 1) {
+        this.modelQuery = this.modelQuery.sort({ discount: -1, price: 1 });
+      } else {
+        this.modelQuery = this.modelQuery.sort({ discount: 1, price: -1 });
+      }
+
+      return this;
+    }
+
+    // Handle other sort parameters
+    if (sortParam.includes(',')) {
+      const [field, order] = sortParam.split(',');
+      const sortOrder = order === 'desc' ? -1 : 1;
+
+      const sortObj: Record<string, 1 | -1> = { [field]: sortOrder };
+      this.modelQuery = this.modelQuery.sort(sortObj);
+    } else {
+      this.modelQuery = this.modelQuery.sort(sortParam);
+    }
 
     return this;
   }
