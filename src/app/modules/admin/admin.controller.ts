@@ -50,7 +50,8 @@ const blockUser = catchAsync(async (req, res) => {
 });
 
 const deleteUser = catchAsync(async (req, res) => {
-  const result = await AdminService.deleteUser(req.params.id);
+  const { userId } = req.user;
+  const result = await AdminService.deleteUser(req.params.id, userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

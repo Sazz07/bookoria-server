@@ -150,7 +150,7 @@ const createOrder = async (
 };
 
 const verifyPayment = async (orderId: string) => {
-  const order = await Order.findById(orderId);
+  const order = await Order.findOne({ 'transaction.id': orderId });
 
   if (!order) {
     throw new AppError(httpStatus.NOT_FOUND, 'Order not found');
@@ -170,8 +170,7 @@ const verifyPayment = async (orderId: string) => {
   if (verifiedPayment.length) {
     const paymentData = verifiedPayment[0];
 
-    // Update order with payment verification details
-    await Order.findByIdAndUpdate(orderId, {
+    await Order.findByIdAndUpdate(order._id, {
       'transaction.bank_status': paymentData.bank_status,
       'transaction.sp_code': paymentData.sp_code.toString(),
       'transaction.sp_message': paymentData.sp_message,
@@ -210,7 +209,11 @@ const getAllOrders = async (query: Record<string, unknown>) => {
     .paginate()
     .fields();
 
-  const result = await orderQuery.modelQuery;
+  const result = await orderQuery.modelQuery.populate({
+    path: 'orderItems.book',
+    select: 'title author coverImage',
+  });
+
   const meta = await orderQuery.countTotal();
 
   return {

@@ -4,6 +4,7 @@ import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { TUserUpdatePayload } from './admin.interface';
+import { USER_ROLE } from '../user/user.constant';
 
 const getAllUsers = async (query: Record<string, unknown>) => {
   const userQuery = new QueryBuilder(User.find({ isDeleted: false }), query)
@@ -70,7 +71,7 @@ const blockUser = async (targetUserId: string, adminId: string) => {
   return result;
 };
 
-const deleteUser = async (id: string) => {
+const deleteUser = async (id: string, adminId: string) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -82,6 +83,17 @@ const deleteUser = async (id: string) => {
 
     if (user.isDeleted) {
       throw new AppError(httpStatus.BAD_REQUEST, 'User is already deleted');
+    }
+
+    if (user._id.toString() === adminId) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'You cannot delete yourself');
+    }
+
+    if (user.role === USER_ROLE.ADMIN) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        'Admin cannot delete another admin',
+      );
     }
 
     const result = await User.findByIdAndUpdate(
