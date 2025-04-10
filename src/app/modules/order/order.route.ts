@@ -20,7 +20,11 @@ router.post(
   OrderController.createOrder,
 );
 
-router.get('/my-orders', auth(USER_ROLE.USER), OrderController.getOrdersByUser);
+router.get(
+  '/my-orders',
+  auth(USER_ROLE.USER, USER_ROLE.ADMIN),
+  OrderController.getOrdersByUser,
+);
 
 router.get('/', auth(USER_ROLE.ADMIN), OrderController.getAllOrders);
 
