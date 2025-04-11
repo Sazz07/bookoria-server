@@ -41,8 +41,8 @@ Follow these steps to set up the project locally:
 ### 1️⃣ Clone Repository
 
 ```sh
-git clone https://github.com/Sazz07/bookoria-server.git
-cd book-shop-backend
+git clone  https://github.com/Sazz07/bookoria-server.git
+cd bookoria-server
 ```
 
 ````
